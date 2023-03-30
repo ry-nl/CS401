@@ -28,27 +28,80 @@ function Parser() {
         data_date: [],
         pred_date: [],
         to_plot: [],
+        data_list: [],// newly added
     });
+
+    // variables for displaying tables
+    const [data, setData] = useState([]);
+    const [columnArray, setColumn] = useState([]);
+    const [values, setValues] = useState([]);
     
     const handleFile = (event) => {
         Papa.parse((event.target.files[0]), {
             worker: true,
             complete: ( (results) => {
-                console.log("displaying data: ")
-                console.log(results.data)
+                // console.log(results.data)
+                let thislist = [];
+                for (let i = 1; i < results.data.length; i++) {
+                    if (results.data[i].length > 2) thislist[i - 1] = results.data[i][1];
+                }
+                // console.log("displaying thislist: " + thislist);
+
+                // for displaying tables
+                const columnArray = [];
+                const valueArray = [];
+                results.data.map( (d) => {
+                    columnArray.push(Object.keys(d));
+                    valueArray.push(Object.values(d));
+                });
+                setData(results.data);
+                setColumn(columnArray[0]);
+                setValues(valueArray);
+                
+                setRowState({ ...rowState, data_list: thislist});
             })
         })
     }
 
     return (
         <div>
+            <h2
+                style={ {display:"flex", margin:"30px auto", paddingLeft:"100px" }}>
+                Upload files here
+            </h2>
             <input
                 type="file"
                 name="file"
-                accpet=".csv"
+                accept=".csv"
                 onChange={handleFile}
                 style={ {display:"block", margin:"10px auto" }}
             ></input>
+
+            <br/>   
+
+            <p
+                style={ {display:"flex", margin:"30px auto", paddingLeft:"100px" }}>
+                File uploaded:
+            </p>
+
+            <table style={{borderCollapse:"collapse", border:"1px solid red", margin:"5px auto"}}>
+                <thead>
+                    <tr>
+                        {columnArray.map((col, i) => (
+                            <th style={{border:"1px solid red"}} key={i}>{col}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {values.map((v, i) => (
+                        <tr key={i}>
+                            {v.map((value, i) => (
+                                <td style={{border:"1px solid red"}} key={i}>{value}</td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
 
         </div>
     )
